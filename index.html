@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Калькулятор ремонта</title>
+    
+    <link rel="stylesheet" href="fa/all.min.css">
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="apple-touch-icon" sizes="512x512" href="assets/icons/icon-512.jpg">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="152x152" href="assets/icons/icon-152.png">
+    <link rel="icon" type="image/png" sizes="144x144" href="assets/icons/icon-144.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="assets/icons/icon-128.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/icon-96.png">
+    <link rel="icon" type="image/png" sizes="72x72" href="assets/icons/icon-72.png">
+
+    <meta name="msapplication-TileColor" content="#2c3e50"> 
+    <meta name="theme-color" content="#1976d2"> <style>
+        /* ОСНОВНЫЕ СТИЛИ (MOBILE-FIRST) */
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            padding: 10px; 
+            background-color: #eef2f6;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        h2, h3, h4 {
+            color: #2c3e50;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #aec6cf;
+            padding-bottom: 5px;
+            font-size: 1.3em;
+        }
+        h2 { font-size: 1.5em; }
+
+        /* Контейнеры */
+        .wall, .material {
+            background: #ffffff;
+            padding: 15px; 
+            margin: 10px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Элементы формы: input, select */
+        input[type="number"], .dim-group select, select:not(.unit-select) {
+            width: 100%; 
+            box-sizing: border-box; 
+            padding: 10px; 
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1em;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        /* Группа измерения (число + единица) */
+        .dim-group {
+            display: flex; 
+            align-items: center;
+            margin-top: 5px; 
+        }
+        .dim-group input { 
+            width: 80px; 
+            flex-shrink: 0;
+            margin-right: 5px;
+            padding: 8px 10px;
+        }
+        .dim-group select {
+            width: 50px; 
+            flex-grow: 0;
+            padding: 8px 5px;
+            font-size: 0.9em;
+        }
+
+        /* КОМПАКТНОСТЬ: Уменьшаем отступ между строками ввода */
+        .wall > label {
+            margin-bottom: 5px; 
+        }
+        label {
+            display: block;
+            font-weight: 500;
+            color: #555;
+            align-items: center;
+        }
+        
+        /* Кнопки */
+        button {
+            width: 100%; 
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 18px; 
+            font-size: 1.1em; 
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+            margin-top: 10px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:active { transform: translateY(0); box-shadow: 0 1px 3px rgba(0, 123, 255, 0.2); }
+
+        .angle-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px; 
+        }
+
+        .btn-small {
+            width: 48%; 
+            background-color: #6c757d;
+            padding: 8px;
+            font-size: 0.9em;
+            margin: 0;
+        }
+        .btn-small:hover { background-color: #5a6268; }
+
+        .remove {
+            background-color: #dc3545;
+            margin-left: 0;
+            margin-top: 10px; 
+            padding: 10px;
+            width: 100%;
+        }
+
+        /* Углы */
+        .angles {
+            border: 1px dashed #cccccc;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            margin-bottom: 10px; 
+        }
+        .angle {
+            background: #e9ecef; 
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+            color: #495057;
+        }
+        
+        /* Блок пола */
+        .floor {
+            background: #f0f8ff; 
+            padding: 10px; 
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid #cfe2f3;
+        }
+        .floor label {
+            margin-bottom: 5px; 
+        }
+
+
+        /* Результаты расчета */
+        .result {
+            background: #e6f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 1em;
+            border-left: 4px solid #007bff;
+            color: #004085;
+            line-height: 1.8;
+        }
+
+        /* ДЕСКТОП: Медиазапрос для экранов больше 600px */
+        @media (min-width: 600px) {
+            body { padding: 20px; }
+            .container { max-width: 800px; margin: 0 auto; }
+            button, .remove { width: auto; display: inline-block; }
+            .angle-buttons { display: block; }
+            .btn-small { width: auto; margin-right: 5px; }
+            .remove { margin-left: 10px; width: auto; }
+            input[type="number"], .dim-group select, select:not(.unit-select) { width: auto; }
+            .dim-group input { width: 80px; }
+            .dim-group { display: inline-flex; }
+            .material label:not(.mat-dimensions label) { display: inline-block; margin-right: 15px; }
+        }
+
+        /* Прочие стили */
+        .fa-solid { margin-right: 5px; }
+        hr { border: none; border-top: 1px solid #dcdcdc; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Калькулятор ремонта <i class="fa-solid fa-ruler-combined"></i></h2>
+
+        <h3>Стены <i class="fa-solid fa-maximize"></i></h3>
+        <div id="walls"></div>
+        <button id="addWall" type="button"><i class="fa-solid fa-plus"></i> Добавить стену</button>
+
+        <hr>
+
+        <h3>Материалы <i class="fa-solid fa-palette"></i></h3>
+        <div id="materials"></div>
+        <button id="addMaterial" type="button"><i class="fa-solid fa-plus"></i> Добавить материал</button>
+    </div>
+
+    <script>
+        // РЕГИСТРАЦИЯ SERVICE WORKER (для PWA)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('SW зарегистрирован:', registration);
+                    })
+                    .catch(error => {
+                        console.log('SW регистрация провалена:', error);
+                    });
+            });
+        }
+
+        // JS - Основные элементы и переменные
+        const wallsContainer = document.getElementById('walls');
+        const materialsContainer = document.getElementById('materials');
+        
+        let wallCount = 0;
+        let walls = [];
+        const DEFAULT_UNIT = 'm';
+
+        // Вспомогательные функции
+        const parse = val => parseFloat(val) || 0;
+        const findWall = id => walls.find(w => w.id == id);
+        const toBaseUnit = (value, unit) => unit === 'cm' ? value / 100 : value;
+
+        // Функция-шаблон для выбора единиц
+        const unitSelectHtml = (defaultVal = DEFAULT_UNIT) => `
+            <select class="unit-select">
+                <option value="m" ${defaultVal === 'm' ? 'selected' : ''}>м</option>
+                <option value="cm" ${defaultVal === 'cm' ? 'selected' : ''}>см</option>
+            </select>
+        `;
+
+        // Обновление селекторов целей (стены/полы)
+        const updateWallSelects = () => document.querySelectorAll('.target').forEach(sel => {
+            sel.innerHTML = '<option value="">- Выберите цель -</option>';
+            walls.forEach(w => {
+                const wallArea = toBaseUnit(w.length, w.unit) * toBaseUnit(w.height, w.unit);
+                const areaUnitText = 'м²';
+                
+                sel.innerHTML += `<option value="wall-${w.id}">Стена ${w.id} (Площадь: ${wallArea.toFixed(2)} ${areaUnitText})</option>`;
+                
+                if (w.floor) {
+                    const floorArea = toBaseUnit(w.floor.length, w.floor.unit) * toBaseUnit(w.floor.width, w.floor.unit);
+                    sel.innerHTML += `<option value="floor-${w.id}">Пол ${w.id} (Площадь: ${floorArea.toFixed(2)} ${areaUnitText})</option>`;
+                }
+            });
+        });
+
+        // Добавление угла
+        function addAngle(container, label, type, dataArray) {
+            const angleId = Date.now();
+            dataArray.push({ id: angleId, type: type });
+            
+            const div = document.createElement('div');
+            div.className = 'angle';
+            div.innerHTML = `<span>${label} угол</span><button class="btn-small remove-angle" type="button">✖</button>`;
+
+            div.querySelector('.remove-angle').addEventListener('click', () => {
+                const index = dataArray.findIndex(a => a.id === angleId);
+                if (index > -1) dataArray.splice(index, 1);
+                div.remove();
+            });
+            container.appendChild(div);
+        }
+
+        // === Создание Стены ===
+        function createWall() {
+            wallCount++;
+            const id = wallCount;
+            const floorData = { length: 0, width: 0, unit: DEFAULT_UNIT };
+            const wallData = { id, length: 0, height: 0, unit: DEFAULT_UNIT, angles: [], floor: null };
+            walls.push(wallData);
+            
+            const div = document.createElement('div');
+            div.className = 'wall';
+            div.innerHTML = `
+                <h3>Стена ${id}</h3>
+                <label>Длина: <span class="dim-group">
+                    <input type="number" class="length" step="0.01" value="0">${unitSelectHtml(wallData.unit)}
+                </span></label>
+                <label>Высота: <span class="dim-group">
+                    <input type="number" class="height" step="0.01" value="0">${unitSelectHtml(wallData.unit)}
+                </span></label>
+                
+                <p>Углы:</p><div class="angles"></div>
+                <div class="angle-buttons">
+                    <button class="btn-small add-inner" type="button"><i class="fa-solid fa-angle-down"></i> Внутренний</button>
+                    <button class="btn-small add-outer" type="button"><i class="fa-solid fa-angle-up"></i> Наружный</button>
+                </div>
+                
+                <label><input type="checkbox" class="add-floor"> Учитывать пол</label>
+                <div class="floor" style="display: none;">
+                    <h4>Параметры пола</h4>
+                    <label>Длина пола: <span class="dim-group">
+                        <input type="number" class="floor-length" step="0.01" value="0">${unitSelectHtml(floorData.unit)}
+                    </span></label>
+                    <label>Ширина пола: <span class="dim-group">
+                        <input type="number" class="floor-width" step="0.01" value="0">${unitSelectHtml(floorData.unit)}
+                    </span></label>
+                </div>
+                <button class="remove" type="button"><i class="fa-solid fa-trash-can"></i> Удалить стену</button>
+            `;
+
+            // Обновление данных стены/пола при вводе
+            const setupInputListeners = (selector, prop, target) => {
+                div.querySelector(selector).addEventListener('input', e => { target[prop] = parse(e.target.value); updateWallSelects(); });
+            };
+            // Обновление единиц стены/пола
+            const setupUnitListeners = (selector, target) => {
+                div.querySelectorAll(selector).forEach(sel => sel.addEventListener('change', e => { target.unit = e.target.value; updateWallSelects(); }));
+            };
+            
+            // Стена
+            setupInputListeners('.length', 'length', wallData);
+            setupInputListeners('.height', 'height', wallData);
+            setupUnitListeners('.wall > label .unit-select', wallData);
+
+            // Пол
+            const floorCheckbox = div.querySelector('.add-floor');
+            floorCheckbox.addEventListener('change', () => {
+                div.querySelector('.floor').style.display = floorCheckbox.checked ? 'block' : 'none';
+                wallData.floor = floorCheckbox.checked ? floorData : null;
+                updateWallSelects();
+            });
+            setupInputListeners('.floor-length', 'length', floorData);
+            setupInputListeners('.floor-width', 'width', floorData);
+            setupUnitListeners('.floor .unit-select', floorData);
+
+            // Углы
+            const anglesContainer = div.querySelector('.angles');
+            div.querySelector('.add-inner').addEventListener('click', () => addAngle(anglesContainer, 'Внутренний', 'inner', wallData.angles));
+            div.querySelector('.add-outer').addEventListener('click', () => addAngle(anglesContainer, 'Наружный', 'outer', wallData.angles));
+            
+            // Удаление
+            div.querySelector('.remove').addEventListener('click', () => {
+                walls = walls.filter(w => w.id !== id);
+                div.remove();
+                updateWallSelects();
+            });
+
+            wallsContainer.appendChild(div);
+            updateWallSelects();
+        }
+
+        // === Создание Материала и Расчет ===
+        function createMaterial() {
+            const div = document.createElement('div');
+            div.className = 'material';
+            div.innerHTML = `
+                <h4>Материал</h4>
+                <label>Тип: <select class="mat-type">
+                    <option value="tile">Плитка</option><option value="plinth">Плинтус</option>
+                    <option value="linoleum">Линолеум</option><option value="panel">Стеновая панель</option>
+                </select></label><br>
+                <label>Применить к: <select class="target"></select></label><br>
+                
+                <div class="mat-dimensions">
+                    <label>Размер:</label>
+                    <div class="dim-group">
+                        <input type="number" class="mat-length" placeholder="Длина" step="0.01" value="0">${unitSelectHtml()}
+                    </div>
+                    <div class="dim-group mat-width-group">
+                        <input type="number" class="mat-width" placeholder="Ширина" step="0.01" value="0">${unitSelectHtml()}
+                    </div>
+                </div>
+
+                <div class="mat-extras">
+                    <label><input type="checkbox" class="use-glue"> Клей (кг/м²)</label>
+                    <label><input type="checkbox" class="use-grout"> Затирка (кг/м²)</label>
+                </div>
+                <button class="calc" type="button"><i class="fa-solid fa-calculator"></i> Рассчитать</button>
+                <div class="result"></div>
+            `;
+
+            const matTypeSelect = div.querySelector('.mat-type');
+            const matWidthGroup = div.querySelector('.mat-width-group');
+            const matExtrasDiv = div.querySelector('.mat-extras');
+            const targetSelect = div.querySelector('.target');
+            const matUnitSelects = div.querySelectorAll('.mat-dimensions .unit-select');
+
+            let matUnit = DEFAULT_UNIT;
+            matUnitSelects.forEach(sel => sel.addEventListener('change', (e) => { matUnit = e.target.value; }));
+
+            updateWallSelects();
+
+            matTypeSelect.addEventListener('change', () => {
+                const isPlinth = matTypeSelect.value === 'plinth';
+                matWidthGroup.style.display = isPlinth ? 'none' : 'flex'; 
+                matExtrasDiv.style.display = isPlinth ? 'none' : 'block';
+                targetSelect.value = '';
+            });
+            matTypeSelect.dispatchEvent(new Event('change')); 
+
+            div.querySelector('.calc').addEventListener('click', () => {
+                const type = matTypeSelect.value;
+                const matLen = parse(div.querySelector('.mat-length').value);
+                const matWid = type === 'plinth' ? 0 : parse(div.querySelector('.mat-width').value); 
+                const targetValue = targetSelect.value;
+                const resultDiv = div.querySelector('.result');
+                resultDiv.innerHTML = "…";
+
+                const [targetType, targetId] = targetValue.split('-');
+                const wall = findWall(targetId);
+
+                if (!wall || !targetValue) {
+                    resultDiv.innerHTML = "❌ Выберите стену или пол."; return;
+                }
+                if (matLen <= 0 || (type !== 'plinth' && matWid <= 0)) {
+                    resultDiv.innerHTML = "⚠️ Проверьте размеры материала."; return;
+                }
+
+                let targetSize = 0; 
+                let resultText = '';
+
+                if (type === 'plinth') {
+                    if (targetType === 'floor') { resultDiv.innerHTML = "❌ Плинтус только для Стены."; return; }
+                    
+                    targetSize = toBaseUnit(wall.length, wall.unit);
+
+                    const materialLength = toBaseUnit(matLen, matUnit);
+
+                    const count = targetSize / materialLength;
+                    const countWithExtra = Math.ceil(count * 1.05);
+                    const inner = wall.angles.filter(a => a.type === 'inner').length;
+                    const outer = wall.angles.filter(a => a.type === 'outer').length;
+
+                    resultText = `
+                        Общая длина: ${targetSize.toFixed(2)} м<br>
+                        Количество: ${count.toFixed(2)} шт<br>
+                        <strong>С запасом (5%): ${countWithExtra} шт</strong><br>
+                        <hr>Углы: Внутренних ${inner}, Наружных ${outer}
+                    `;
+                } else {
+                    let areaLength, areaWidth, areaUnit;
+
+                    if (targetType === 'wall') {
+                        areaLength = wall.length;
+                        areaWidth = wall.height;
+                        areaUnit = wall.unit;
+                    } else if (targetType === 'floor' && wall.floor) {
+                        areaLength = wall.floor.length;
+                        areaWidth = wall.floor.width;
+                        areaUnit = wall.floor.unit;
+                    } else {
+                        resultDiv.innerHTML = "⚠️ Недостаточно данных для площади."; return;
+                    }
+                    
+                    targetSize = toBaseUnit(areaLength, areaUnit) * toBaseUnit(areaWidth, areaUnit);
+                    
+                    const matArea = toBaseUnit(matLen, matUnit) * toBaseUnit(matWid, matUnit);
+                    if (matArea <= 0) { resultDiv.innerHTML = "⚠️ Площадь материала равна нулю."; return; }
+                    
+                    const count = targetSize / matArea;
+                    const countWithExtra = count * 1.1; 
+
+                    resultText = `
+                        Общая площадь: ${targetSize.toFixed(2)} м²<br>
+                        Количество: ${count.toFixed(2)} шт<br>
+                        <strong>С запасом (10%): ${countWithExtra.toFixed(2)} шт</strong>
+                    `;
+                    
+                    if (div.querySelector('.use-glue').checked || div.querySelector('.use-grout').checked) {
+                        let glue = 0, grout = 0;
+                        if (type === 'tile') { glue = targetSize * 5; grout = targetSize * 0.5; }
+                        else if (type === 'panel') { glue = targetSize * 0.8; }
+                        else if (type === 'linoleum') { glue = targetSize * 0.3; }
+                        resultText += `<br><hr>Клей: ${glue.toFixed(2)} кг<br>Затирка: ${grout.toFixed(2)} кг`;
+                    }
+                }
+                resultDiv.innerHTML = resultText;
+            });
+
+            materialsContainer.appendChild(div);
+        }
+
+        // Инициализация
+        document.getElementById('addWall').addEventListener('click', createWall);
+        document.getElementById('addMaterial').addEventListener('click', createMaterial);
+        
+        createWall();
+    </script>
+</body>
+</html>
