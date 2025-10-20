@@ -1,496 +1,303 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Калькулятор ремонта</title>
-    
-    <link rel="stylesheet" href="fa/all.min.css">
-    <link rel="manifest" href="manifest.json">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Калькулятор ремонта</title>
+  <meta name="theme-color" content="#1976d2">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Калькулятор ремонта">
+  <link rel="apple-touch-icon" href="icon-512.png">
 
-    <link rel="apple-touch-icon" sizes="512x512" href="assets/icons/icon-512.jpg">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
-    <link rel="icon" type="image/png" sizes="152x152" href="assets/icons/icon-152.png">
-    <link rel="icon" type="image/png" sizes="144x144" href="assets/icons/icon-144.png">
-    <link rel="icon" type="image/png" sizes="128x128" href="assets/icons/icon-128.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/icon-96.png">
-    <link rel="icon" type="image/png" sizes="72x72" href="assets/icons/icon-72.png">
-
-    <meta name="msapplication-TileColor" content="#2c3e50"> 
-    <meta name="theme-color" content="#1976d2"> <style>
-        /* ОСНОВНЫЕ СТИЛИ (MOBILE-FIRST) */
-        body {
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            padding: 10px; 
-            background-color: #eef2f6;
-            color: #333;
-            line-height: 1.4;
-        }
-
-        h2, h3, h4 {
-            color: #2c3e50;
-            margin-top: 20px;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #aec6cf;
-            padding-bottom: 5px;
-            font-size: 1.3em;
-        }
-        h2 { font-size: 1.5em; }
-
-        /* Контейнеры */
-        .wall, .material {
-            background: #ffffff;
-            padding: 15px; 
-            margin: 10px 0;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e0e0e0;
-        }
-
-        /* Элементы формы: input, select */
-        input[type="number"], .dim-group select, select:not(.unit-select) {
-            width: 100%; 
-            box-sizing: border-box; 
-            padding: 10px; 
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 1em;
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
-
-        /* Группа измерения (число + единица) */
-        .dim-group {
-            display: flex; 
-            align-items: center;
-            margin-top: 5px; 
-        }
-        .dim-group input { 
-            width: 80px; 
-            flex-shrink: 0;
-            margin-right: 5px;
-            padding: 8px 10px;
-        }
-        .dim-group select {
-            width: 50px; 
-            flex-grow: 0;
-            padding: 8px 5px;
-            font-size: 0.9em;
-        }
-
-        /* КОМПАКТНОСТЬ: Уменьшаем отступ между строками ввода */
-        .wall > label {
-            margin-bottom: 5px; 
-        }
-        label {
-            display: block;
-            font-weight: 500;
-            color: #555;
-            align-items: center;
-        }
-        
-        /* Кнопки */
-        button {
-            width: 100%; 
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 12px 18px; 
-            font-size: 1.1em; 
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
-            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
-            margin-top: 10px;
-        }
-        button:hover { background-color: #0056b3; }
-        button:active { transform: translateY(0); box-shadow: 0 1px 3px rgba(0, 123, 255, 0.2); }
-
-        .angle-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px; 
-        }
-
-        .btn-small {
-            width: 48%; 
-            background-color: #6c757d;
-            padding: 8px;
-            font-size: 0.9em;
-            margin: 0;
-        }
-        .btn-small:hover { background-color: #5a6268; }
-
-        .remove {
-            background-color: #dc3545;
-            margin-left: 0;
-            margin-top: 10px; 
-            padding: 10px;
-            width: 100%;
-        }
-
-        /* Углы */
-        .angles {
-            border: 1px dashed #cccccc;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #f8f9fa;
-            margin-bottom: 10px; 
-        }
-        .angle {
-            background: #e9ecef; 
-            padding: 8px 12px;
-            margin: 5px 0;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9em;
-            color: #495057;
-        }
-        
-        /* Блок пола */
-        .floor {
-            background: #f0f8ff; 
-            padding: 10px; 
-            margin-top: 10px;
-            border-radius: 8px;
-            border: 1px solid #cfe2f3;
-        }
-        .floor label {
-            margin-bottom: 5px; 
-        }
-
-
-        /* Результаты расчета */
-        .result {
-            background: #e6f7ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 1em;
-            border-left: 4px solid #007bff;
-            color: #004085;
-            line-height: 1.8;
-        }
-
-        /* ДЕСКТОП: Медиазапрос для экранов больше 600px */
-        @media (min-width: 600px) {
-            body { padding: 20px; }
-            .container { max-width: 800px; margin: 0 auto; }
-            button, .remove { width: auto; display: inline-block; }
-            .angle-buttons { display: block; }
-            .btn-small { width: auto; margin-right: 5px; }
-            .remove { margin-left: 10px; width: auto; }
-            input[type="number"], .dim-group select, select:not(.unit-select) { width: auto; }
-            .dim-group input { width: 80px; }
-            .dim-group { display: inline-flex; }
-            .material label:not(.mat-dimensions label) { display: inline-block; margin-right: 15px; }
-        }
-
-        /* Прочие стили */
-        .fa-solid { margin-right: 5px; }
-        hr { border: none; border-top: 1px solid #dcdcdc; margin: 20px 0; }
-    </style>
+  <style>
+    :root {
+      --primary: #007bff;
+      --danger: #dc3545;
+      --bg: #eef2f6;
+      --radius: 12px;
+    }
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: #333;
+      margin: 0;
+      padding: 10px;
+      line-height: 1.5;
+    }
+    h2,h3,h4 {
+      color: #2c3e50;
+      border-bottom: 2px solid #aec6cf;
+      padding-bottom: 6px;
+      margin-top: 12px;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding-bottom: 60px; }
+    .wall, .material {
+      background: #fff; padding: 15px; margin: 10px 0; border-radius: var(--radius);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    label {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 6px; margin: 6px 0; flex-wrap: wrap; width: 100%;
+    }
+    input[type="number"], select {
+      flex: 1; min-width: 90px; padding: 8px 10px;
+      border: 1px solid #ccc; border-radius: 8px; font-size: 1em; text-align: center;
+    }
+    .unit-select { width: 70px !important; min-width: 70px !important; padding: 6px 8px; }
+    button {
+      background: var(--primary); color: white; border: none; border-radius: 10px;
+      padding: 10px 14px; cursor: pointer; width: 100%;
+      font-size: 1em; margin-top: 8px; transition: background 0.2s;
+    }
+    button:hover { background: #0056b3; }
+    .remove { background: var(--danger); }
+    .remove:hover { background: #b92d3a; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+    .controls button { flex: 1; min-width: 100px; }
+    .orientation { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 6px 0; }
+    .result {
+      background: #e6f7ff; border-left: 4px solid var(--primary);
+      padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.95em;
+    }
+    @media (min-width: 700px) {
+      .controls button { width: auto; flex: none; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Калькулятор ремонта <i class="fa-solid fa-ruler-combined"></i></h2>
+  <div class="container">
+    <h2>Калькулятор ремонта 🧱</h2>
 
-        <h3>Стены <i class="fa-solid fa-maximize"></i></h3>
-        <div id="walls"></div>
-        <button id="addWall" type="button"><i class="fa-solid fa-plus"></i> Добавить стену</button>
-
-        <hr>
-
-        <h3>Материалы <i class="fa-solid fa-palette"></i></h3>
-        <div id="materials"></div>
-        <button id="addMaterial" type="button"><i class="fa-solid fa-plus"></i> Добавить материал</button>
+    <div class="controls">
+      <button id="saveProject">💾 Сохранить</button>
+      <button id="loadProject">📂 Загрузить</button>
+      <button id="clearProject" class="remove">🗑 Очистить</button>
     </div>
 
-    <script>
-        // РЕГИСТРАЦИЯ SERVICE WORKER (для PWA)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => {
-                        console.log('SW зарегистрирован:', registration);
-                    })
-                    .catch(error => {
-                        console.log('SW регистрация провалена:', error);
-                    });
-            });
+    <h3>Стены</h3>
+    <div id="walls"></div>
+    <button id="addWall">+ Добавить стену</button>
+
+    <hr>
+
+    <h3>Материалы</h3>
+    <div id="materials"></div>
+    <button id="addMaterial">+ Добавить материал</button>
+  </div>
+
+  <script>
+    const wallsContainer = document.getElementById('walls');
+    const materialsContainer = document.getElementById('materials');
+    let walls = [];
+    let wallCount = 0;
+    const DEFAULT_UNIT = 'm';
+    const parseNum = v => parseFloat(v) || 0;
+    const toM = (v,u)=>u==='cm'?v/100:v;
+    const findWall = id => walls.find(w => w.id == id);
+
+    // ---------- LocalStorage ----------
+    function saveToStorage() {
+      const data = {
+        walls,
+        materials: [...materialsContainer.querySelectorAll('.material')].map(m => ({
+          type: m.querySelector('.type').value,
+          target: m.querySelector('.target').value,
+          len: parseNum(m.querySelector('.mlen').value),
+          wid: parseNum(m.querySelector('.mwid').value),
+          lenUnit: m.querySelectorAll('.unit-select')[0]?.value,
+          widUnit: m.querySelectorAll('.unit-select')[1]?.value,
+          orient: m.querySelector('input[type="radio"]:checked')?.value || "vertical"
+        }))
+      };
+      localStorage.setItem("repair_calc_project", JSON.stringify(data));
+    }
+
+    function loadFromStorage() {
+      const data = JSON.parse(localStorage.getItem("repair_calc_project") || "{}");
+      if (!data.walls) return;
+      walls = []; wallsContainer.innerHTML = ""; materialsContainer.innerHTML = ""; wallCount = 0;
+      data.walls.forEach(w => createWall(w));
+      data.materials?.forEach(m => {
+        const div = createMaterial(m);
+        div.querySelector('.type').value = m.type;
+        div.querySelector('.target').value = m.target;
+        div.querySelector('.mlen').value = m.len;
+        div.querySelector('.mwid').value = m.wid;
+        div.querySelectorAll('.unit-select')[0].value = m.lenUnit;
+        div.querySelectorAll('.unit-select')[1].value = m.widUnit;
+        if (m.type === "panel") {
+          div.querySelectorAll('input[type="radio"]').forEach(r=>r.checked=(r.value===m.orient));
         }
+      });
+      updateTargets();
+    }
 
-        // JS - Основные элементы и переменные
-        const wallsContainer = document.getElementById('walls');
-        const materialsContainer = document.getElementById('materials');
-        
-        let wallCount = 0;
-        let walls = [];
-        const DEFAULT_UNIT = 'm';
+    function clearStorage() {
+      if (confirm("Очистить всё?")) {
+        localStorage.removeItem("repair_calc_project");
+        location.reload();
+      }
+    }
 
-        // Вспомогательные функции
-        const parse = val => parseFloat(val) || 0;
-        const findWall = id => walls.find(w => w.id == id);
-        const toBaseUnit = (value, unit) => unit === 'cm' ? value / 100 : value;
+    document.getElementById("saveProject").onclick = () => { saveToStorage(); alert("✅ Сохранено!"); };
+    document.getElementById("loadProject").onclick = loadFromStorage;
+    document.getElementById("clearProject").onclick = clearStorage;
 
-        // Функция-шаблон для выбора единиц
-        const unitSelectHtml = (defaultVal = DEFAULT_UNIT) => `
-            <select class="unit-select">
-                <option value="m" ${defaultVal === 'm' ? 'selected' : ''}>м</option>
-                <option value="cm" ${defaultVal === 'cm' ? 'selected' : ''}>см</option>
-            </select>
-        `;
+    // ---------- Основные ----------
+    const unitSelectHtml = (def=DEFAULT_UNIT)=>`
+      <select class="unit-select">
+        <option value="m" ${def==='m'?'selected':''}>м</option>
+        <option value="cm" ${def==='cm'?'selected':''}>см</option>
+      </select>`;
 
-        // Обновление селекторов целей (стены/полы)
-        const updateWallSelects = () => document.querySelectorAll('.target').forEach(sel => {
-            sel.innerHTML = '<option value="">- Выберите цель -</option>';
-            walls.forEach(w => {
-                const wallArea = toBaseUnit(w.length, w.unit) * toBaseUnit(w.height, w.unit);
-                const areaUnitText = 'м²';
-                
-                sel.innerHTML += `<option value="wall-${w.id}">Стена ${w.id} (Площадь: ${wallArea.toFixed(2)} ${areaUnitText})</option>`;
-                
-                if (w.floor) {
-                    const floorArea = toBaseUnit(w.floor.length, w.floor.unit) * toBaseUnit(w.floor.width, w.floor.unit);
-                    sel.innerHTML += `<option value="floor-${w.id}">Пол ${w.id} (Площадь: ${floorArea.toFixed(2)} ${areaUnitText})</option>`;
-                }
-            });
+    function updateTargets() {
+      document.querySelectorAll('.target').forEach(sel=>{
+        const prev = sel.value;
+        sel.innerHTML = '<option value="">- Выберите цель -</option>';
+        if (walls.length>0)
+          sel.innerHTML += `<option value="all-walls">Все стены</option><option value="all-floors">Все полы</option>`;
+        walls.forEach(w=>{
+          const area = toM(w.length,w.unit)*toM(w.height,w.unit);
+          sel.innerHTML += `<option value="wall-${w.id}">Стена ${w.id} (${area.toFixed(2)} м²)</option>`;
+          if(w.floor){
+            const fa=toM(w.floor.length,w.floor.unit)*toM(w.floor.width,w.floor.unit);
+            sel.innerHTML += `<option value="floor-${w.id}">Пол ${w.id} (${fa.toFixed(2)} м²)</option>`;
+          }
         });
+        if([...sel.options].some(o=>o.value===prev)) sel.value=prev;
+      });
+    }
 
-        // Добавление угла
-        function addAngle(container, label, type, dataArray) {
-            const angleId = Date.now();
-            dataArray.push({ id: angleId, type: type });
-            
-            const div = document.createElement('div');
-            div.className = 'angle';
-            div.innerHTML = `<span>${label} угол</span><button class="btn-small remove-angle" type="button">✖</button>`;
+    // ---------- Стены ----------
+    function createWall(existing=null){
+      wallCount++;
+      const id=wallCount;
+      const wall=existing || {id,length:0,height:0,unit:DEFAULT_UNIT,inner:0,outer:0,floor:null};
+      wall.id=id;
+      walls.push(wall);
 
-            div.querySelector('.remove-angle').addEventListener('click', () => {
-                const index = dataArray.findIndex(a => a.id === angleId);
-                if (index > -1) dataArray.splice(index, 1);
-                div.remove();
-            });
-            container.appendChild(div);
+      const div=document.createElement('div');
+      div.className='wall';
+      div.innerHTML=`
+        <h4>Стена ${id}</h4>
+        <label>Длина: <span class="dim-group"><input type="number" class="len" value="${wall.length}">${unitSelectHtml(wall.unit)}</span></label>
+        <label>Высота: <span class="dim-group"><input type="number" class="hei" value="${wall.height}">${unitSelectHtml(wall.unit)}</span></label>
+        <label>Внутренних углов: <input type="number" class="in" value="${wall.inner}" min="0" max="10" style="width:60px;"></label>
+        <label>Наружных углов: <input type="number" class="out" value="${wall.outer}" min="0" max="10" style="width:60px;"></label>
+        <label><input type="checkbox" class="fchk" ${wall.floor?'checked':''}> Учитывать пол</label>
+        <div class="floor" style="display:${wall.floor?'block':'none'};">
+          <label>Длина пола: <span class="dim-group"><input type="number" class="flen" value="${wall.floor?.length||0}">${unitSelectHtml(wall.floor?.unit||'m')}</span></label>
+          <label>Ширина пола: <span class="dim-group"><input type="number" class="fwid" value="${wall.floor?.width||0}">${unitSelectHtml(wall.floor?.unit||'m')}</span></label>
+        </div>
+        <button class="remove">Удалить</button>
+      `;
+      const upd=()=>{updateTargets(); saveToStorage();};
+      div.querySelector('.len').oninput=e=>{wall.length=parseNum(e.target.value);upd();};
+      div.querySelector('.hei').oninput=e=>{wall.height=parseNum(e.target.value);upd();};
+      div.querySelector('.in').oninput=e=>{wall.inner=parseNum(e.target.value);upd();};
+      div.querySelector('.out').oninput=e=>{wall.outer=parseNum(e.target.value);upd();};
+      div.querySelectorAll('.unit-select')[0].onchange=e=>{wall.unit=e.target.value;upd();};
+      div.querySelectorAll('.unit-select')[1].onchange=e=>{wall.unit=e.target.value;upd();};
+      const fchk=div.querySelector('.fchk');
+      fchk.onchange=()=>{
+        const floorDiv=div.querySelector('.floor');
+        if(fchk.checked){ floorDiv.style.display='block'; wall.floor={length:0,width:0,unit:DEFAULT_UNIT}; }
+        else{ floorDiv.style.display='none'; wall.floor=null; }
+        upd();
+      };
+      div.querySelector('.flen').oninput=e=>{if(wall.floor)wall.floor.length=parseNum(e.target.value);upd();};
+      div.querySelector('.fwid').oninput=e=>{if(wall.floor)wall.floor.width=parseNum(e.target.value);upd();};
+      div.querySelectorAll('.floor .unit-select').forEach(s=>s.onchange=e=>{if(wall.floor)wall.floor.unit=e.target.value;upd();});
+      div.querySelector('.remove').onclick=()=>{walls=walls.filter(w=>w.id!==id);div.remove();upd();};
+      wallsContainer.appendChild(div);
+      updateTargets();
+    }
+
+    // ---------- Материалы ----------
+    function createMaterial(existing=null){
+      const div=document.createElement('div');
+      div.className='material';
+      const uid=Date.now()+Math.random();
+      div.innerHTML=`
+        <h4>Материал</h4>
+        <label>Тип:
+          <select class="type">
+            <option value="tile">Плитка</option>
+            <option value="plinth">Плинтус</option>
+            <option value="linoleum">Линолеум</option>
+            <option value="panel">Стеновая панель</option>
+            <option value="wallpaper">Обои</option>
+          </select>
+        </label>
+        <label>Применить к: <select class="target"></select></label>
+        <label><span>Длина:</span><span class="dim-group"><input type="number" class="mlen" value="${existing?.len||0}">${unitSelectHtml(existing?.lenUnit||'m')}</span></label>
+        <label><span>Ширина:</span><span class="dim-group"><input type="number" class="mwid" value="${existing?.wid||0}">${unitSelectHtml(existing?.widUnit||'m')}</span></label>
+        <div class="orientation" style="display:none;">
+          <span style="font-weight:500;color:#444;">Монтаж панелей:</span>
+          <label><input type="radio" name="orient-${uid}" value="vertical" checked> Вертикально</label>
+          <label><input type="radio" name="orient-${uid}" value="horizontal"> Горизонтально</label>
+        </div>
+        <button class="calc">Рассчитать</button>
+        <div class="result"></div>
+      `;
+      materialsContainer.appendChild(div);
+      updateTargets();
+      const typeSel=div.querySelector('.type');
+      const orientDiv=div.querySelector('.orientation');
+      const refresh=()=>{ orientDiv.style.display = typeSel.value==='panel'?'flex':'none'; saveToStorage(); };
+      typeSel.onchange=refresh; refresh();
+
+      div.querySelector('.calc').onclick=()=>{
+        const type=div.querySelector('.type').value;
+        const target=div.querySelector('.target').value;
+        const len=parseNum(div.querySelector('.mlen').value);
+        const wid=parseNum(div.querySelector('.mwid').value);
+        const lenUnit=div.querySelectorAll('.unit-select')[0]?.value||'m';
+        const widUnit=div.querySelectorAll('.unit-select')[1]?.value||'m';
+        const res=div.querySelector('.result');
+        if(!target){res.innerHTML='❌ Выберите цель';return;}
+        if(len<=0){res.innerHTML='⚠️ Введите длину материала';return;}
+        let count=0;
+
+        if(type==='plinth'){
+          let total=0; if(target==='all-walls') walls.forEach(w=> total+=toM(w.length,w.unit));
+          else if(target.startsWith('wall-')){const w=findWall(target.split('-')[1]); if(w) total=toM(w.length,w.unit);}
+          count=total/toM(len,lenUnit);
         }
-
-        // === Создание Стены ===
-        function createWall() {
-            wallCount++;
-            const id = wallCount;
-            const floorData = { length: 0, width: 0, unit: DEFAULT_UNIT };
-            const wallData = { id, length: 0, height: 0, unit: DEFAULT_UNIT, angles: [], floor: null };
-            walls.push(wallData);
-            
-            const div = document.createElement('div');
-            div.className = 'wall';
-            div.innerHTML = `
-                <h3>Стена ${id}</h3>
-                <label>Длина: <span class="dim-group">
-                    <input type="number" class="length" step="0.01" value="0">${unitSelectHtml(wallData.unit)}
-                </span></label>
-                <label>Высота: <span class="dim-group">
-                    <input type="number" class="height" step="0.01" value="0">${unitSelectHtml(wallData.unit)}
-                </span></label>
-                
-                <p>Углы:</p><div class="angles"></div>
-                <div class="angle-buttons">
-                    <button class="btn-small add-inner" type="button"><i class="fa-solid fa-angle-down"></i> Внутренний</button>
-                    <button class="btn-small add-outer" type="button"><i class="fa-solid fa-angle-up"></i> Наружный</button>
-                </div>
-                
-                <label><input type="checkbox" class="add-floor"> Учитывать пол</label>
-                <div class="floor" style="display: none;">
-                    <h4>Параметры пола</h4>
-                    <label>Длина пола: <span class="dim-group">
-                        <input type="number" class="floor-length" step="0.01" value="0">${unitSelectHtml(floorData.unit)}
-                    </span></label>
-                    <label>Ширина пола: <span class="dim-group">
-                        <input type="number" class="floor-width" step="0.01" value="0">${unitSelectHtml(floorData.unit)}
-                    </span></label>
-                </div>
-                <button class="remove" type="button"><i class="fa-solid fa-trash-can"></i> Удалить стену</button>
-            `;
-
-            // Обновление данных стены/пола при вводе
-            const setupInputListeners = (selector, prop, target) => {
-                div.querySelector(selector).addEventListener('input', e => { target[prop] = parse(e.target.value); updateWallSelects(); });
-            };
-            // Обновление единиц стены/пола
-            const setupUnitListeners = (selector, target) => {
-                div.querySelectorAll(selector).forEach(sel => sel.addEventListener('change', e => { target.unit = e.target.value; updateWallSelects(); }));
-            };
-            
-            // Стена
-            setupInputListeners('.length', 'length', wallData);
-            setupInputListeners('.height', 'height', wallData);
-            setupUnitListeners('.wall > label .unit-select', wallData);
-
-            // Пол
-            const floorCheckbox = div.querySelector('.add-floor');
-            floorCheckbox.addEventListener('change', () => {
-                div.querySelector('.floor').style.display = floorCheckbox.checked ? 'block' : 'none';
-                wallData.floor = floorCheckbox.checked ? floorData : null;
-                updateWallSelects();
+        else if(type==='panel'){
+          const orient=div.querySelector('input[type="radio"]:checked')?.value||'vertical';
+          let total=0; if(target==='all-walls'){
+            walls.forEach(w=>{
+              const L=toM(w.length,w.unit),H=toM(w.height,w.unit);
+              const pL=toM(len,lenUnit),pW=toM(wid,widUnit);
+              total+=orient==='vertical' ? Math.ceil(H/pL)*Math.ceil(L/pW) : Math.ceil(H/pW)*Math.ceil(L/pL);
             });
-            setupInputListeners('.floor-length', 'length', floorData);
-            setupInputListeners('.floor-width', 'width', floorData);
-            setupUnitListeners('.floor .unit-select', floorData);
-
-            // Углы
-            const anglesContainer = div.querySelector('.angles');
-            div.querySelector('.add-inner').addEventListener('click', () => addAngle(anglesContainer, 'Внутренний', 'inner', wallData.angles));
-            div.querySelector('.add-outer').addEventListener('click', () => addAngle(anglesContainer, 'Наружный', 'outer', wallData.angles));
-            
-            // Удаление
-            div.querySelector('.remove').addEventListener('click', () => {
-                walls = walls.filter(w => w.id !== id);
-                div.remove();
-                updateWallSelects();
-            });
-
-            wallsContainer.appendChild(div);
-            updateWallSelects();
+          } count=total;
         }
-
-        // === Создание Материала и Расчет ===
-        function createMaterial() {
-            const div = document.createElement('div');
-            div.className = 'material';
-            div.innerHTML = `
-                <h4>Материал</h4>
-                <label>Тип: <select class="mat-type">
-                    <option value="tile">Плитка</option><option value="plinth">Плинтус</option>
-                    <option value="linoleum">Линолеум</option><option value="panel">Стеновая панель</option>
-                </select></label><br>
-                <label>Применить к: <select class="target"></select></label><br>
-                
-                <div class="mat-dimensions">
-                    <label>Размер:</label>
-                    <div class="dim-group">
-                        <input type="number" class="mat-length" placeholder="Длина" step="0.01" value="0">${unitSelectHtml()}
-                    </div>
-                    <div class="dim-group mat-width-group">
-                        <input type="number" class="mat-width" placeholder="Ширина" step="0.01" value="0">${unitSelectHtml()}
-                    </div>
-                </div>
-
-                <div class="mat-extras">
-                    <label><input type="checkbox" class="use-glue"> Клей (кг/м²)</label>
-                    <label><input type="checkbox" class="use-grout"> Затирка (кг/м²)</label>
-                </div>
-                <button class="calc" type="button"><i class="fa-solid fa-calculator"></i> Рассчитать</button>
-                <div class="result"></div>
-            `;
-
-            const matTypeSelect = div.querySelector('.mat-type');
-            const matWidthGroup = div.querySelector('.mat-width-group');
-            const matExtrasDiv = div.querySelector('.mat-extras');
-            const targetSelect = div.querySelector('.target');
-            const matUnitSelects = div.querySelectorAll('.mat-dimensions .unit-select');
-
-            let matUnit = DEFAULT_UNIT;
-            matUnitSelects.forEach(sel => sel.addEventListener('change', (e) => { matUnit = e.target.value; }));
-
-            updateWallSelects();
-
-            matTypeSelect.addEventListener('change', () => {
-                const isPlinth = matTypeSelect.value === 'plinth';
-                matWidthGroup.style.display = isPlinth ? 'none' : 'flex'; 
-                matExtrasDiv.style.display = isPlinth ? 'none' : 'block';
-                targetSelect.value = '';
-            });
-            matTypeSelect.dispatchEvent(new Event('change')); 
-
-            div.querySelector('.calc').addEventListener('click', () => {
-                const type = matTypeSelect.value;
-                const matLen = parse(div.querySelector('.mat-length').value);
-                const matWid = type === 'plinth' ? 0 : parse(div.querySelector('.mat-width').value); 
-                const targetValue = targetSelect.value;
-                const resultDiv = div.querySelector('.result');
-                resultDiv.innerHTML = "…";
-
-                const [targetType, targetId] = targetValue.split('-');
-                const wall = findWall(targetId);
-
-                if (!wall || !targetValue) {
-                    resultDiv.innerHTML = "❌ Выберите стену или пол."; return;
-                }
-                if (matLen <= 0 || (type !== 'plinth' && matWid <= 0)) {
-                    resultDiv.innerHTML = "⚠️ Проверьте размеры материала."; return;
-                }
-
-                let targetSize = 0; 
-                let resultText = '';
-
-                if (type === 'plinth') {
-                    if (targetType === 'floor') { resultDiv.innerHTML = "❌ Плинтус только для Стены."; return; }
-                    
-                    targetSize = toBaseUnit(wall.length, wall.unit);
-
-                    const materialLength = toBaseUnit(matLen, matUnit);
-
-                    const count = targetSize / materialLength;
-                    const countWithExtra = Math.ceil(count * 1.05);
-                    const inner = wall.angles.filter(a => a.type === 'inner').length;
-                    const outer = wall.angles.filter(a => a.type === 'outer').length;
-
-                    resultText = `
-                        Общая длина: ${targetSize.toFixed(2)} м<br>
-                        Количество: ${count.toFixed(2)} шт<br>
-                        <strong>С запасом (5%): ${countWithExtra} шт</strong><br>
-                        <hr>Углы: Внутренних ${inner}, Наружных ${outer}
-                    `;
-                } else {
-                    let areaLength, areaWidth, areaUnit;
-
-                    if (targetType === 'wall') {
-                        areaLength = wall.length;
-                        areaWidth = wall.height;
-                        areaUnit = wall.unit;
-                    } else if (targetType === 'floor' && wall.floor) {
-                        areaLength = wall.floor.length;
-                        areaWidth = wall.floor.width;
-                        areaUnit = wall.floor.unit;
-                    } else {
-                        resultDiv.innerHTML = "⚠️ Недостаточно данных для площади."; return;
-                    }
-                    
-                    targetSize = toBaseUnit(areaLength, areaUnit) * toBaseUnit(areaWidth, areaUnit);
-                    
-                    const matArea = toBaseUnit(matLen, matUnit) * toBaseUnit(matWid, matUnit);
-                    if (matArea <= 0) { resultDiv.innerHTML = "⚠️ Площадь материала равна нулю."; return; }
-                    
-                    const count = targetSize / matArea;
-                    const countWithExtra = count * 1.1; 
-
-                    resultText = `
-                        Общая площадь: ${targetSize.toFixed(2)} м²<br>
-                        Количество: ${count.toFixed(2)} шт<br>
-                        <strong>С запасом (10%): ${countWithExtra.toFixed(2)} шт</strong>
-                    `;
-                    
-                    if (div.querySelector('.use-glue').checked || div.querySelector('.use-grout').checked) {
-                        let glue = 0, grout = 0;
-                        if (type === 'tile') { glue = targetSize * 5; grout = targetSize * 0.5; }
-                        else if (type === 'panel') { glue = targetSize * 0.8; }
-                        else if (type === 'linoleum') { glue = targetSize * 0.3; }
-                        resultText += `<br><hr>Клей: ${glue.toFixed(2)} кг<br>Затирка: ${grout.toFixed(2)} кг`;
-                    }
-                }
-                resultDiv.innerHTML = resultText;
-            });
-
-            materialsContainer.appendChild(div);
+        else{
+          let area=0;
+          if(target==='all-walls') walls.forEach(w=> area+=toM(w.length,w.unit)*toM(w.height,w.unit));
+          else if(target.startsWith('wall-')){const w=findWall(target.split('-')[1]); if(w) area=toM(w.length,w.unit)*toM(w.height,w.unit);}
+          const matA=toM(len,lenUnit)*toM(wid,widUnit);
+          count=area/matA;
         }
+        const withExtra=Math.ceil(count*1.1);
+        res.innerHTML=`Количество: ${Math.ceil(count)} шт<br><strong>С запасом: ${withExtra} шт</strong>`;
+        saveToStorage();
+      };
+      return div;
+    }
 
-        // Инициализация
-        document.getElementById('addWall').addEventListener('click', createWall);
-        document.getElementById('addMaterial').addEventListener('click', createMaterial);
-        
-        createWall();
-    </script>
+    // ---------- Инициализация ----------
+    document.getElementById('addWall').onclick=()=>{createWall();saveToStorage();};
+    document.getElementById('addMaterial').onclick=()=>{createMaterial();saveToStorage();};
+    createWall();
+    window.addEventListener("beforeunload", saveToStorage);
+    loadFromStorage();
+  </script>
 </body>
 </html>
