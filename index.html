@@ -1,129 +1,157 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4258758862980138"
-     crossorigin="anonymous"></script>
+  <!-- AdSense (оставляем ваш ID) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4258758862980138" crossorigin="anonymous"></script>
+  <meta name="google-adsense-account" content="ca-pub-4258758862980138">
+
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>Калькулятор ремонта</title>
-  <meta name="theme-color" content="#1976d2">
+  <title>RemontCalc — Расчёт материалов</title>
+  <meta name="theme-color" content="#bdbdbd">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" type="image/png">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Калькулятор ремонта">
+  <meta name="apple-mobile-web-app-title" content="RemontCalc">
   <link rel="apple-touch-icon" href="icon-512.png">
 
+  <!-- Roboto font for PDF and UI -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..700,0..1,0..200" rel="stylesheet">
+
+  <!-- jsPDF and html2canvas (для корректного экспорта кириллицы) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   <style>
-    :root {
-      --primary: #007bff;
-      --danger: #dc3545;
-      --bg: #eef2f6;
-      --radius: 12px;
-    }
-    body {
-      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: #333;
-      margin: 0;
-      padding: 10px;
-      line-height: 1.5;
-    }
-    h2,h3,h4 {
-      color: #2c3e50;
-      border-bottom: 2px solid #aec6cf;
-      padding-bottom: 6px;
-      margin-top: 12px;
-    }
-    .container { max-width: 900px; margin: 0 auto; padding-bottom: 60px; }
-    .wall, .material {
-      background: #fff; padding: 15px; margin: 10px 0; border-radius: var(--radius);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-    label {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 6px; margin: 6px 0; flex-wrap: wrap; width: 100%;
-    }
-    input[type="number"], select {
-      flex: 1; min-width: 90px; padding: 8px 10px;
-      border: 1px solid #ccc; border-radius: 8px; font-size: 1em; text-align: center;
-    }
-    .unit-select { width: 70px !important; min-width: 70px !important; padding: 6px 8px; }
-    button {
-      background: var(--primary); color: white; border: none; border-radius: 10px;
-      padding: 10px 14px; cursor: pointer; width: 100%;
-      font-size: 1em; margin-top: 8px; transition: background 0.2s;
-    }
-    button:hover { background: #0056b3; }
-    .remove { background: var(--danger); }
-    .remove:hover { background: #b92d3a; }
-    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-    .controls button { flex: 1; min-width: 100px; }
-    .orientation { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 6px 0; }
-    .result {
-      background: #e6f7ff; border-left: 4px solid var(--primary);
-      padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.95em;
-    }
-    @media (min-width: 700px) {
-      .controls button { width: auto; flex: none; }
-    }
+    :root{ --bg:#ececec; --card:#ffffff; --accent:#2e7d32; --accent-2:#fb8c00; --muted:#6b6b6b; --radius:14px }
+    *{box-sizing:border-box}
+    body{ margin:0; font-family: 'Roboto', 'Segoe UI', Roboto, Arial, sans-serif; background:linear-gradient(180deg,var(--bg),#efefef 60%); color:#222 }
+    header.appbar{ background:linear-gradient(180deg,#cfcfcf,#bdbdbd); padding:12px 16px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:40 }
+    .logo{ width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:white; font-weight:700 }
+    header h1{ margin:0; font-size:18px }
+    header .right{ margin-left:auto; display:flex; gap:8px; align-items:center }
+    .container{ max-width:980px; margin:16px auto; padding:12px }
+    .controls{ display:flex; gap:10px; margin-bottom:12px; align-items:center; flex-wrap:wrap }
+    .btn{ padding:10px 12px; border-radius:12px; border:none; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.06); cursor:pointer }
+    .btn.primary{ background:linear-gradient(135deg,var(--accent),#1b5e20); color:#fff }
+    .card{ background:var(--card); border-radius:var(--radius); padding:14px; box-shadow:0 8px 20px rgba(0,0,0,.06); margin-bottom:12px }
+    label{ display:flex; align-items:center; gap:8px; justify-content:space-between; margin:8px 0; flex-wrap:wrap }
+    input[type="number"], input[type="text"], select{ padding:8px 10px; border-radius:10px; border:1px solid #d0d0d0; min-width:76px; text-align:center }
+    .dim-group{ display:inline-flex; gap:6px; align-items:center }
+    .result{ background:linear-gradient(180deg,#f7fff8,#e8f5e9); border-left:4px solid var(--accent); padding:10px; border-radius:8px; margin-top:8px; font-weight:600 }
+    .price-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+    .fab-container{ position:fixed; right:18px; bottom:18px; display:flex; flex-direction:column; gap:10px }
+    .fab{ width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 18px rgba(0,0,0,.16); border:none }
+    .ad-note{ font-size:12px; color:var(--muted); margin-bottom:8px; text-align:center }
+    .buy-btn{ display:inline-block; padding:8px 10px; border-radius:8px; background:linear-gradient(135deg,#ffb74d,#fb8c00); color:#fff; text-decoration:none }
+    /* hidden printable report */
+    #reportPrint { position:fixed; left:-9999px; top:-9999px; width:800px; background:white; padding:20px; font-family: 'Roboto', sans-serif; color:#111 }
+    @media(min-width:900px){ .container{ padding:0 } }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Калькулятор ремонта 🧱</h2>
-
-    <div class="controls">
-      <button id="saveProject">💾 Сохранить</button>
-      <button id="loadProject">📂 Загрузить</button>
-      <button id="clearProject" class="remove">🗑 Очистить</button>
+  <header class="appbar">
+    <div class="logo">RC</div>
+    <div>
+      <h1>RemontCalc</h1>
+      <div style="font-size:12px;color:var(--muted)">Расчёт материалов — RemontCalc</div>
     </div>
 
-    <h3>Стены</h3>
-    <div id="walls"></div>
-    <button id="addWall">+ Добавить стену</button>
+    <div class="right">
+      <label style="margin:0;display:flex;align-items:center;gap:8px">
+        <span style="font-size:13px;color:var(--muted)">Валюта</span>
+        <select id="currencySelect" style="padding:8px;border-radius:8px">
+          <option value="KZT">₸</option>
+          <option value="RUB">₽</option>
+          <option value="USD">$</option>
+          <option value="EUR">€</option>
+        </select>
+      </label>
+    </div>
+  </header>
 
-    <hr>
+  <main class="container">
+    <div class="controls">
+      <button id="addWallBtnTop" class="btn"><span class="material-symbols-outlined">wallpaper</span> Добавить стену</button>
+      <button id="addMaterialTop" class="btn"><span class="material-symbols-outlined">add_box</span> Добавить материал</button>
+      <div style="flex:1"></div>
+      <button id="saveProject" class="btn primary"><span class="material-symbols-outlined">save</span> Сохранить</button>
+      <button id="loadProject" class="btn"><span class="material-symbols-outlined">folder_open</span> Загрузить</button>
+      <button id="clearProject" class="btn" style="background:linear-gradient(135deg,#ef5350,#e53935);color:#fff"><span class="material-symbols-outlined">delete</span> Очистить</button>
+      <button id="exportPdf" class="btn" title="Скачать PDF">📄 Скачать PDF</button>
+    </div>
 
-    <h3>Материалы</h3>
-    <div id="materials"></div>
-    <button id="addMaterial">+ Добавить материал</button>
+    <section>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><h2 style="margin:0">Стены</h2><small style="color:var(--muted)">meeting_room</small></div>
+      <div id="walls"></div>
+      <div style="margin-top:8px"><button id="addWall" class="btn" style="width:100%">➕ Добавить стену</button></div>
+    </section>
+
+    <div id="ad-area" class="card" aria-hidden="false">
+      <div style="width:100%;max-width:760px;margin:0 auto">
+        <div class="ad-note">Реклама — поддержка проекта</div>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4258758862980138" data-ad-slot="1234567890" data-ad-format="auto"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+    </div>
+
+    <section>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><h2 style="margin:0">Материалы</h2><small style="color:var(--muted)">inventory_2</small></div>
+      <div id="materials"></div>
+      <!-- нижняя дублирующая кнопка удалена; добавление материалов — сверху -->
+    </section>
+  </main>
+
+  <div class="fab-container" role="toolbar" aria-label="Проект">
+    <button class="fab" id="fabSave" title="Сохранить" style="background:linear-gradient(135deg,var(--accent),#27632a);color:#fff">💾</button>
+    <button class="fab" id="fabLoad" title="Загрузить" style="background:linear-gradient(135deg,#ffb74d,#fb8c00);">📂</button>
+    <button class="fab" id="fabClear" title="Очистить" style="background:linear-gradient(135deg,#ef5350,#e53935);">🗑</button>
   </div>
 
+  <!-- Скрытый блок для генерации PDF через html2canvas (чтобы кириллица рендерилась корректно) -->
+  <div id="reportPrint" aria-hidden="true"></div>
+
   <script>
+    // ---- core data and helpers ----
     const wallsContainer = document.getElementById('walls');
     const materialsContainer = document.getElementById('materials');
-    let walls = [];
-    let wallCount = 0;
-    const DEFAULT_UNIT = 'm';
+    const currencySelect = document.getElementById('currencySelect');
+    let currency = localStorage.getItem('remontcalc_currency') || 'KZT';
+    currencySelect.value = currency;
+    const currencySymbols = { KZT: '₸', RUB: '₽', USD: '$', EUR: '€' };
+
+    let walls = []; let wallCount = 0; const DEFAULT_UNIT = 'm';
     const parseNum = v => parseFloat(v) || 0;
     const toM = (v,u)=>u==='cm'?v/100:v;
     const findWall = id => walls.find(w => w.id == id);
 
-    // ---------- LocalStorage ----------
-    function saveToStorage() {
-      const data = {
-        walls,
-        materials: [...materialsContainer.querySelectorAll('.material')].map(m => ({
-          type: m.querySelector('.type').value,
-          target: m.querySelector('.target').value,
-          len: parseNum(m.querySelector('.mlen').value),
-          wid: parseNum(m.querySelector('.mwid').value),
-          lenUnit: m.querySelectorAll('.unit-select')[0]?.value,
-          widUnit: m.querySelectorAll('.unit-select')[1]?.value,
-          orient: m.querySelector('input[type="radio"]:checked')?.value || "vertical"
-        }))
-      };
-      localStorage.setItem("repair_calc_project", JSON.stringify(data));
+    // ---- storage ----
+    function saveToStorage(){
+      const data = { currency, walls, materials: [...materialsContainer.querySelectorAll('.material')].map(m=>({
+        type: m.querySelector('.type').value,
+        target: m.querySelector('.target').value,
+        len: parseNum(m.querySelector('.mlen').value),
+        wid: parseNum(m.querySelector('.mwid').value),
+        lenUnit: m.querySelectorAll('.unit-select')[0]?.value,
+        widUnit: m.querySelectorAll('.unit-select')[1]?.value,
+        orient: m.querySelector('input[type="radio"]:checked')?.value || 'vertical',
+        price: parseNum(m.querySelector('.price')?.value)
+      })) };
+      localStorage.setItem('repair_calc_project', JSON.stringify(data));
+      localStorage.setItem('remontcalc_currency', currency);
     }
 
-    function loadFromStorage() {
-      const data = JSON.parse(localStorage.getItem("repair_calc_project") || "{}");
+    function loadFromStorage(){
+      const data = JSON.parse(localStorage.getItem('repair_calc_project') || '{}');
       if (!data.walls) return;
-      walls = []; wallsContainer.innerHTML = ""; materialsContainer.innerHTML = ""; wallCount = 0;
-      data.walls.forEach(w => createWall(w));
-      data.materials?.forEach(m => {
+      walls = []; wallsContainer.innerHTML = ''; materialsContainer.innerHTML = ''; wallCount = 0;
+      if (data.currency) { currency = data.currency; currencySelect.value = currency; }
+      data.walls.forEach(w=>createWall(w));
+      data.materials?.forEach(m=>{
         const div = createMaterial(m);
         div.querySelector('.type').value = m.type;
         div.querySelector('.target').value = m.target;
@@ -131,60 +159,55 @@
         div.querySelector('.mwid').value = m.wid;
         div.querySelectorAll('.unit-select')[0].value = m.lenUnit;
         div.querySelectorAll('.unit-select')[1].value = m.widUnit;
-        if (m.type === "panel") {
-          div.querySelectorAll('input[type="radio"]').forEach(r=>r.checked=(r.value===m.orient));
-        }
+        if (m.type === 'panel') div.querySelectorAll('input[type="radio"]').forEach(r=>r.checked=(r.value===m.orient));
+        if (m.price) div.querySelector('.price').value = m.price;
       });
       updateTargets();
     }
 
-    function clearStorage() {
-      if (confirm("Очистить всё?")) {
-        localStorage.removeItem("repair_calc_project");
-        location.reload();
-      }
-    }
+    function clearStorage(){ if (confirm('Очистить всё?')){ localStorage.removeItem('repair_calc_project'); location.reload(); } }
 
-    document.getElementById("saveProject").onclick = () => { saveToStorage(); alert("✅ Сохранено!"); };
-    document.getElementById("loadProject").onclick = loadFromStorage;
-    document.getElementById("clearProject").onclick = clearStorage;
+    // ---- UI bindings ----
+    document.getElementById('saveProject').onclick = ()=>{ saveToStorage(); alert('✅ Сохранено!'); };
+    document.getElementById('loadProject').onclick = loadFromStorage;
+    document.getElementById('clearProject').onclick = clearStorage;
+    document.getElementById('fabSave').onclick = ()=>document.getElementById('saveProject').click();
+    document.getElementById('fabLoad').onclick = ()=>document.getElementById('loadProject').click();
+    document.getElementById('fabClear').onclick = ()=>document.getElementById('clearProject').click();
+    document.getElementById('addWallBtnTop').onclick = ()=>{ createWall(); saveToStorage(); };
+    document.getElementById('addMaterialTop').onclick = ()=>{ createMaterial(); saveToStorage(); };
 
-    // ---------- Основные ----------
+    currencySelect.onchange = ()=>{ currency = currencySelect.value; localStorage.setItem('remontcalc_currency', currency); updateAllResults(); };
+
+    // ---- unit select html helper ----
     const unitSelectHtml = (def=DEFAULT_UNIT)=>`
       <select class="unit-select">
-        <option value="m" ${def==='m'?'selected':''}>м</option>
-        <option value="cm" ${def==='cm'?'selected':''}>см</option>
+        <option value="m" ${""} >м</option>
+        <option value="cm" ${""} >см</option>
       </select>`;
 
-    function updateTargets() {
+    function updateTargets(){
       document.querySelectorAll('.target').forEach(sel=>{
         const prev = sel.value;
         sel.innerHTML = '<option value="">- Выберите цель -</option>';
-        if (walls.length>0)
-          sel.innerHTML += `<option value="all-walls">Все стены</option><option value="all-floors">Все полы</option>`;
+        if (walls.length>0) sel.innerHTML += `<option value="all-walls">Все стены</option><option value="all-floors">Все полы</option>`;
         walls.forEach(w=>{
           const area = toM(w.length,w.unit)*toM(w.height,w.unit);
           sel.innerHTML += `<option value="wall-${w.id}">Стена ${w.id} (${area.toFixed(2)} м²)</option>`;
-          if(w.floor){
-            const fa=toM(w.floor.length,w.floor.unit)*toM(w.floor.width,w.floor.unit);
-            sel.innerHTML += `<option value="floor-${w.id}">Пол ${w.id} (${fa.toFixed(2)} м²)</option>`;
-          }
+          if (w.floor){ const fa = toM(w.floor.length,w.floor.unit)*toM(w.floor.width,w.floor.unit); sel.innerHTML += `<option value="floor-${w.id}">Пол ${w.id} (${fa.toFixed(2)} м²)</option>`; }
         });
-        if([...sel.options].some(o=>o.value===prev)) sel.value=prev;
+        if ([...sel.options].some(o=>o.value===prev)) sel.value = prev;
       });
     }
 
-    // ---------- Стены ----------
+    // ---- walls ----
     function createWall(existing=null){
-      wallCount++;
-      const id=wallCount;
-      const wall=existing || {id,length:0,height:0,unit:DEFAULT_UNIT,inner:0,outer:0,floor:null};
-      wall.id=id;
-      walls.push(wall);
+      wallCount++; const id = wallCount;
+      const wall = existing || { id, length:0, height:0, unit:DEFAULT_UNIT, inner:0, outer:0, floor:null };
+      wall.id = id; walls.push(wall);
 
-      const div=document.createElement('div');
-      div.className='wall';
-      div.innerHTML=`
+      const div = document.createElement('div'); div.className = 'wall card';
+      div.innerHTML = `
         <h4>Стена ${id}</h4>
         <label>Длина: <span class="dim-group"><input type="number" class="len" value="${wall.length}">${unitSelectHtml(wall.unit)}</span></label>
         <label>Высота: <span class="dim-group"><input type="number" class="hei" value="${wall.height}">${unitSelectHtml(wall.unit)}</span></label>
@@ -195,36 +218,33 @@
           <label>Длина пола: <span class="dim-group"><input type="number" class="flen" value="${wall.floor?.length||0}">${unitSelectHtml(wall.floor?.unit||'m')}</span></label>
           <label>Ширина пола: <span class="dim-group"><input type="number" class="fwid" value="${wall.floor?.width||0}">${unitSelectHtml(wall.floor?.unit||'m')}</span></label>
         </div>
-        <button class="remove">Удалить</button>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button class="btn" style="background:linear-gradient(135deg,#ef5350,#e53935);color:#fff" onclick="this.closest('.wall').remove();">Удалить</button>
+        </div>
       `;
-      const upd=()=>{updateTargets(); saveToStorage();};
-      div.querySelector('.len').oninput=e=>{wall.length=parseNum(e.target.value);upd();};
-      div.querySelector('.hei').oninput=e=>{wall.height=parseNum(e.target.value);upd();};
-      div.querySelector('.in').oninput=e=>{wall.inner=parseNum(e.target.value);upd();};
-      div.querySelector('.out').oninput=e=>{wall.outer=parseNum(e.target.value);upd();};
-      div.querySelectorAll('.unit-select')[0].onchange=e=>{wall.unit=e.target.value;upd();};
-      div.querySelectorAll('.unit-select')[1].onchange=e=>{wall.unit=e.target.value;upd();};
-      const fchk=div.querySelector('.fchk');
-      fchk.onchange=()=>{
-        const floorDiv=div.querySelector('.floor');
-        if(fchk.checked){ floorDiv.style.display='block'; wall.floor={length:0,width:0,unit:DEFAULT_UNIT}; }
-        else{ floorDiv.style.display='none'; wall.floor=null; }
-        upd();
-      };
-      div.querySelector('.flen').oninput=e=>{if(wall.floor)wall.floor.length=parseNum(e.target.value);upd();};
-      div.querySelector('.fwid').oninput=e=>{if(wall.floor)wall.floor.width=parseNum(e.target.value);upd();};
-      div.querySelectorAll('.floor .unit-select').forEach(s=>s.onchange=e=>{if(wall.floor)wall.floor.unit=e.target.value;upd();});
-      div.querySelector('.remove').onclick=()=>{walls=walls.filter(w=>w.id!==id);div.remove();upd();};
-      wallsContainer.appendChild(div);
-      updateTargets();
+
+      const upd = ()=>{ updateTargets(); saveToStorage(); };
+      div.querySelector('.len').oninput = e=>{ wall.length = parseNum(e.target.value); upd(); };
+      div.querySelector('.hei').oninput = e=>{ wall.height = parseNum(e.target.value); upd(); };
+      div.querySelector('.in').oninput = e=>{ wall.inner = parseNum(e.target.value); upd(); };
+      div.querySelector('.out').oninput = e=>{ wall.outer = parseNum(e.target.value); upd(); };
+      div.querySelectorAll('.unit-select')[0].onchange = e=>{ wall.unit = e.target.value; upd(); };
+      div.querySelectorAll('.unit-select')[1].onchange = e=>{ wall.unit = e.target.value; upd(); };
+      const fchk = div.querySelector('.fchk');
+      fchk.onchange = ()=>{ const floorDiv = div.querySelector('.floor'); if (fchk.checked){ floorDiv.style.display='block'; wall.floor = { length:0, width:0, unit:DEFAULT_UNIT }; } else { floorDiv.style.display='none'; wall.floor = null; } upd(); };
+      div.querySelector('.flen').oninput = e=>{ if (wall.floor) wall.floor.length = parseNum(e.target.value); upd(); };
+      div.querySelector('.fwid').oninput = e=>{ if (wall.floor) wall.floor.width = parseNum(e.target.value); upd(); };
+      div.querySelectorAll('.floor .unit-select').forEach(s=>s.onchange = e=>{ if (wall.floor) wall.floor.unit = e.target.value; upd(); });
+      div.querySelector('.btn').onclick = ()=>{ walls = walls.filter(w=>w.id!==id); div.remove(); upd(); };
+
+      wallsContainer.appendChild(div); updateTargets();
     }
 
-    // ---------- Материалы ----------
+    // ---- materials ----
     function createMaterial(existing=null){
-      const div=document.createElement('div');
-      div.className='material';
-      const uid=Date.now()+Math.random();
-      div.innerHTML=`
+      const div = document.createElement('div'); div.className = 'material card';
+      const uid = Date.now()+Math.random();
+      div.innerHTML = `
         <h4>Материал</h4>
         <label>Тип:
           <select class="type">
@@ -238,68 +258,154 @@
         <label>Применить к: <select class="target"></select></label>
         <label><span>Длина:</span><span class="dim-group"><input type="number" class="mlen" value="${existing?.len||0}">${unitSelectHtml(existing?.lenUnit||'m')}</span></label>
         <label><span>Ширина:</span><span class="dim-group"><input type="number" class="mwid" value="${existing?.wid||0}">${unitSelectHtml(existing?.widUnit||'m')}</span></label>
+        <div class="price-row">
+          <label style="flex:1">Цена за ед.: <input type="number" step="0.01" class="price" value="${existing?.price||0}" placeholder="0"></label>
+          <div style="align-self:center"> <small style="color:var(--muted)">(${currencySymbols[currency] || '₸'})</small></div>
+        </div>
         <div class="orientation" style="display:none;">
           <span style="font-weight:500;color:#444;">Монтаж панелей:</span>
           <label><input type="radio" name="orient-${uid}" value="vertical" checked> Вертикально</label>
           <label><input type="radio" name="orient-${uid}" value="horizontal"> Горизонтально</label>
         </div>
-        <button class="calc">Рассчитать</button>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button class="btn calc">Рассчитать</button>
+          <button class="btn" onclick="this.closest('.material').remove(); updateTargets(); saveToStorage(); return false;">Удалить</button>
+        </div>
         <div class="result"></div>
       `;
-      materialsContainer.appendChild(div);
-      updateTargets();
-      const typeSel=div.querySelector('.type');
-      const orientDiv=div.querySelector('.orientation');
-      const refresh=()=>{ orientDiv.style.display = typeSel.value==='panel'?'flex':'none'; saveToStorage(); };
-      typeSel.onchange=refresh; refresh();
 
-      div.querySelector('.calc').onclick=()=>{
-        const type=div.querySelector('.type').value;
-        const target=div.querySelector('.target').value;
-        const len=parseNum(div.querySelector('.mlen').value);
-        const wid=parseNum(div.querySelector('.mwid').value);
-        const lenUnit=div.querySelectorAll('.unit-select')[0]?.value||'m';
-        const widUnit=div.querySelectorAll('.unit-select')[1]?.value||'m';
-        const res=div.querySelector('.result');
-        if(!target){res.innerHTML='❌ Выберите цель';return;}
-        if(len<=0){res.innerHTML='⚠️ Введите длину материала';return;}
-        let count=0;
+      materialsContainer.appendChild(div); updateTargets();
+      const typeSel = div.querySelector('.type'); const orientDiv = div.querySelector('.orientation');
+      const refresh = ()=>{ orientDiv.style.display = typeSel.value==='panel' ? 'flex' : 'none'; saveToStorage(); };
+      typeSel.onchange = refresh; refresh();
 
-        if(type==='plinth'){
-          let total=0; if(target==='all-walls') walls.forEach(w=> total+=toM(w.length,w.unit));
-          else if(target.startsWith('wall-')){const w=findWall(target.split('-')[1]); if(w) total=toM(w.length,w.unit);}
-          count=total/toM(len,lenUnit);
-        }
-        else if(type==='panel'){
-          const orient=div.querySelector('input[type="radio"]:checked')?.value||'vertical';
-          let total=0; if(target==='all-walls'){
+      div.querySelector('.price').oninput = ()=>{ updateAllResults(); saveToStorage(); };
+
+      div.querySelector('.calc').onclick = ()=>{
+        const type = div.querySelector('.type').value;
+        const target = div.querySelector('.target').value;
+        const len = parseNum(div.querySelector('.mlen').value);
+        const wid = parseNum(div.querySelector('.mwid').value);
+        const lenUnit = div.querySelectorAll('.unit-select')[0]?.value||'m';
+        const widUnit = div.querySelectorAll('.unit-select')[1]?.value||'m';
+        const res = div.querySelector('.result');
+        if (!target){ res.innerHTML='❌ Выберите цель'; return; }
+        if (len<=0){ res.innerHTML='⚠️ Введите длину материала'; return; }
+        let count = 0;
+
+        if (type==='plinth'){
+          let total = 0; if (target==='all-walls') walls.forEach(w=> total+=toM(w.length,w.unit));
+          else if (target.startsWith('wall-')){ const w=findWall(target.split('-')[1]); if (w) total = toM(w.length,w.unit); }
+          count = total / toM(len,lenUnit);
+        } else if (type==='panel'){
+          const orient = div.querySelector('input[type="radio"]:checked')?.value || 'vertical';
+          let total = 0; if (target==='all-walls'){
             walls.forEach(w=>{
-              const L=toM(w.length,w.unit),H=toM(w.height,w.unit);
-              const pL=toM(len,lenUnit),pW=toM(wid,widUnit);
-              total+=orient==='vertical' ? Math.ceil(H/pL)*Math.ceil(L/pW) : Math.ceil(H/pW)*Math.ceil(L/pL);
+              const L = toM(w.length,w.unit), H = toM(w.height,w.unit);
+              const pL = toM(len,lenUnit), pW = toM(wid,widUnit);
+              total += orient==='vertical' ? Math.ceil(H/pL)*Math.ceil(L/pW) : Math.ceil(H/pW)*Math.ceil(L/pL);
             });
-          } count=total;
+          }
+          count = total;
+        } else {
+          let area = 0;
+          if (target==='all-walls') walls.forEach(w=> area+=toM(w.length,w.unit)*toM(w.height,w.unit));
+          else if (target.startsWith('wall-')){ const w=findWall(target.split('-')[1]); if (w) area = toM(w.length,w.unit)*toM(w.height,w.unit); }
+          const matA = toM(len,lenUnit)*toM(wid,widUnit);
+          count = area / matA;
         }
-        else{
-          let area=0;
-          if(target==='all-walls') walls.forEach(w=> area+=toM(w.length,w.unit)*toM(w.height,w.unit));
-          else if(target.startsWith('wall-')){const w=findWall(target.split('-')[1]); if(w) area=toM(w.length,w.unit)*toM(w.height,w.unit);}
-          const matA=toM(len,lenUnit)*toM(wid,widUnit);
-          count=area/matA;
-        }
-        const withExtra=Math.ceil(count*1.1);
-        res.innerHTML=`Количество: ${Math.ceil(count)} шт<br><strong>С запасом: ${withExtra} шт</strong>`;
+
+        const countRounded = Math.ceil(count);
+        const withExtra = Math.ceil(count * 1.1);
+        const price = parseNum(div.querySelector('.price').value);
+        const total = Math.ceil(count) * price;
+        const totalWithExtra = withExtra * price;
+        const sym = currencySymbols[currency] || '₸';
+
+        res.innerHTML = `Количество: ${countRounded} шт<br>С запасом: ${withExtra} шт<br>Цена за шт: ${sym}${price.toLocaleString()}<br><strong>Итого: ${sym}${total.toLocaleString()}</strong><br><strong>Итого с запасом: ${sym}${totalWithExtra.toLocaleString()}</strong>`;
         saveToStorage();
       };
+
       return div;
     }
 
-    // ---------- Инициализация ----------
-    document.getElementById('addWall').onclick=()=>{createWall();saveToStorage();};
-    document.getElementById('addMaterial').onclick=()=>{createMaterial();saveToStorage();};
-    createWall();
-    window.addEventListener("beforeunload", saveToStorage);
-    loadFromStorage();
+    function updateAllResults(){
+      document.querySelectorAll('.material').forEach(m=>{
+        const calcBtn = m.querySelector('.calc'); if (calcBtn) calcBtn.click();
+        const note = m.querySelector('.price-row small'); if (note) note.textContent = `(${currencySymbols[currency] || '₸'})`;
+      });
+    }
+
+    // ---- export PDF (html2canvas -> jsPDF to support кириллицу) ----
+    async function exportPDF(){
+      // Build report HTML inside hidden container
+      const report = document.getElementById('reportPrint');
+      report.innerHTML = '';
+      const h1 = document.createElement('h2'); h1.textContent = '🧱 RemontCalc — Расчёт материалов'; report.appendChild(h1);
+      report.appendChild(document.createElement('hr'));
+
+      const date = new Date();
+      const dateStr = date.toLocaleDateString('ru-RU');
+      const dnode = document.createElement('div'); dnode.style.marginBottom='8px'; dnode.textContent = 'Отчёт сформирован: ' + dateStr; report.appendChild(dnode);
+
+      // Walls
+      const wallsTitle = document.createElement('div'); wallsTitle.textContent='Стены:'; wallsTitle.style.fontWeight='600'; report.appendChild(wallsTitle);
+      walls.forEach(w=>{
+        const area = (toM(w.length,w.unit)*toM(w.height,w.unit)).toFixed(2);
+        const el = document.createElement('div'); el.textContent = `Стена ${w.id}: ${w.length}${w.unit} x ${w.height}${w.unit} — ${area} м²`; report.appendChild(el);
+      });
+      report.appendChild(document.createElement('hr'));
+
+      // Materials
+      const matTitle = document.createElement('div'); matTitle.textContent='Материалы:'; matTitle.style.fontWeight='600'; report.appendChild(matTitle);
+      let grandTotal = 0; let grandTotalWithExtra = 0;
+      [...materialsContainer.querySelectorAll('.material')].forEach(m=>{
+        const type = m.querySelector('.type').selectedOptions[0].textContent;
+        const target = m.querySelector('.target').selectedOptions[0]?.textContent || '-';
+
+        const resDiv = m.querySelector('.result');
+        const price = parseNum(m.querySelector('.price')?.value);
+        const entry = document.createElement('div'); entry.style.marginTop='6px';
+        entry.innerHTML = `<strong>${type}</strong> — ${target}`;
+        report.appendChild(entry);
+        if (resDiv && resDiv.innerText){
+          resDiv.innerText.split('\n').forEach(row=>{ const r = document.createElement('div'); r.textContent = row; report.appendChild(r); });
+          const matchTotal = resDiv.innerText.match(/Итого:\s*.*?([\d\s,]+)/);
+          const matchWith = resDiv.innerText.match(/Итого с запасом:\s*.*?([\d\s,]+)/);
+          if (matchTotal){ const v = parseFloat(matchTotal[1].replace(/\s+/g,'')); if (!isNaN(v)) grandTotal += v; }
+          if (matchWith){ const v = parseFloat(matchWith[1].replace(/\s+/g,'')); if (!isNaN(v)) grandTotalWithExtra += v; }
+        } else {
+          const note = document.createElement('div'); note.textContent = '— нет расчёта'; report.appendChild(note);
+        }
+      });
+
+      const totalEl = document.createElement('div'); totalEl.style.marginTop='12px'; totalEl.style.fontWeight='700'; totalEl.textContent = `Общая сумма (без запаса): ${currencySymbols[currency]||'₸'}${Number(grandTotal).toLocaleString()}`; report.appendChild(totalEl);
+      const totalWithEl = document.createElement('div'); totalWithEl.style.marginTop='6px'; totalWithEl.style.fontWeight='700'; totalWithEl.textContent = `Общая сумма (с запасом): ${currencySymbols[currency]||'₸'}${Number(grandTotalWithExtra).toLocaleString()}`; report.appendChild(totalWithEl);
+
+      // Wait for fonts to load then render
+      await document.fonts.ready;
+      const bbox = report.getBoundingClientRect();
+      const scale = 2; // higher for better quality
+      const canvas = await html2canvas(report, { scale: scale, useCORS: true, backgroundColor: '#ffffff' });
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgProps = { width: canvas.width, height: canvas.height };
+      const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height);
+      const imgWidth = imgProps.width * ratio;
+      const imgHeight = imgProps.height * ratio;
+      pdf.addImage(imgData, 'JPEG', (pageWidth - imgWidth)/2, 20, imgWidth, imgHeight);
+      pdf.save('remontcalc_report.pdf');
+    }
+
+    document.getElementById('exportPdf').onclick = exportPDF;
+
+    // ---- init ----
+    document.getElementById('addWall').onclick = ()=>{ createWall(); saveToStorage(); };
+    createWall(); window.addEventListener('beforeunload', saveToStorage);
+    loadFromStorage(); updateAllResults();
   </script>
 </body>
 </html>
