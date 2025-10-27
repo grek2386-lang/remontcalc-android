@@ -1,0 +1,4 @@
+#Sat Oct 25 10:31:47 QYZT 2025
+base.0=D\:\\Project\\Android\\A6\\app\\build\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+renamed.0=classes.dex
+path.0=classes.dex
